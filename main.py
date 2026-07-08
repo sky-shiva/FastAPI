@@ -3,8 +3,8 @@ from pydantic import BaseModel,Field,computed_field
 from fastapi.responses import JSONResponse
 import json
 from typing import Annotated,Literal
-app=FastAPI() # created object with name app
 
+app=FastAPI() # created object with name app
 
 class Patient(BaseModel):
     
@@ -21,6 +21,7 @@ class Patient(BaseModel):
     def bmi(self)->float:
         bmi=round(self.weight/(self.height**2),2)
         return bmi
+    
     
     @computed_field
     @property
