@@ -93,7 +93,6 @@ def sort_patients(sort_by:str=Query(
     
     
 @app.post("/create")
-
 def create_patient(patient:Patient): # pydantic moodel loading in patient variable
     
     # load existing data
@@ -107,6 +106,17 @@ def create_patient(patient:Patient): # pydantic moodel loading in patient variab
     save_data(data)
     
     return JSONResponse(status_code=201,content={'message':'patient created successfully'})
+
+@app.delete("/delete/{idp}")
+def delete_data(idp:str=Path(...,description="Enter the patient id to delete",example="P001")):
+    data = load_data()
+    if idp not in data:
+        raise HTTPException(status_code=404,detail=f"Patient not found with {idp}")
+    del data[idp]
+    save_data(data)
+    return {"message": f"Patient {idp} deleted successfully"}
+
+
     
     
     
