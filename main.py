@@ -148,6 +148,8 @@ def edit_patient(idp:str,patient_update:Update): # patient_update is pydantic ob
     return JSONResponse(status_code=200,content=f"Patient id {idp} updated successfully")
 
 
+
+
     
     
     
