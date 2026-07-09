@@ -2,7 +2,7 @@ from fastapi import FastAPI,Path,HTTPException,Query
 from pydantic import BaseModel,Field,computed_field
 from fastapi.responses import JSONResponse
 import json
-from typing import Annotated,Literal
+from typing import Annotated,Literal,Optional
 
 app=FastAPI() # created object with name app
 
@@ -34,7 +34,18 @@ class Patient(BaseModel):
             return "Normal"
         else:
             return "Obese"
-    
+
+from typing import Optional, Annotated, Literal
+from pydantic import BaseModel, Field
+
+class Update(BaseModel):
+    name: Optional[Annotated[str, Field(description="Name")]] = None
+    city: Optional[Annotated[str, Field(description="City")]] = None
+    age: Optional[Annotated[int, Field(gt=0, lt=120)]] = None
+    gender: Optional[Literal["male", "female", "others"]] = None
+    height: Optional[Annotated[float, Field(gt=0)]] = None
+    weight: Optional[Annotated[float, Field(gt=0)]] = None
+ 
 
 def load_data():
     with open ('patients.json','r') as f:
@@ -108,7 +119,7 @@ def create_patient(patient:Patient): # pydantic moodel loading in patient variab
     return JSONResponse(status_code=201,content={'message':'patient created successfully'})
 
 @app.delete("/delete/{idp}")
-def delete_data(idp:str=Path(...,description="Enter the patient id to delete",example="P001")):
+def delete_data(idp:str=Path(...,description="Enter the patient id to delete",examples="P001")):
     data = load_data()
     if idp not in data:
         raise HTTPException(status_code=404,detail=f"Patient not found with {idp}")
@@ -117,6 +128,31 @@ def delete_data(idp:str=Path(...,description="Enter the patient id to delete",ex
     return {"message": f"Patient {idp} deleted successfully"}
 
 
+@app.put("/edit/{idp}")
+
+def edit_patient(idp:str,patient_update:Update): # patient_update is pydantic object
+    
+    data=load_data()
+    if idp not in data:
+        raise HTTPException(status_code=404,detail="Patient Id not Found")
+    existing_info=data[idp]
+    # converting the patient_update into object
+    updated_patient_info=patient_update.model_dump(exclude_unset=True) # it will send only the data entered by the client
+    
+    for key,value in updated_patient_info.items(): # looping in updated and updated in existing
+        existing_info[key]=value
+    existing_info['patient_id']=idp
+    patient_pydantic=Patient(**existing_info)
+    data[idp]=patient_pydantic.model_dump(exclude={'patient_id'})
+    save_data(data)
+    return JSONResponse(status_code=200,content=f"Patient id {idp} updated successfully")
+
+
+    
+    
+    
+    
+    
     
     
     
